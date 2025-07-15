@@ -9,6 +9,7 @@ import os
 import time
 import json
 import glob
+import platform
 import requests
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -45,12 +46,27 @@ class NSEDataScraper:
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
+        
+        # Set platform-specific user agent
+        system_platform = platform.system().lower()
+        if system_platform == "windows":
+            user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+        elif system_platform == "darwin":  # macOS
+            user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+        else:  # Linux
+            user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+        
+        chrome_options.add_argument(f"--user-agent={user_agent}")
         
         # Additional options to avoid detection
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
+        
+        # Windows-specific options
+        if system_platform == "windows":
+            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument("--disable-extensions")
         
         try:
             # Try to get chrome driver path and verify it
@@ -58,17 +74,29 @@ class NSEDataScraper:
             logger.info(f"Chrome driver path: {driver_path}")
             
             # Check if the path points to actual chromedriver executable
-            if not driver_path.endswith('chromedriver'):
+            # Handle platform-specific executable names
+            executable_name = "chromedriver.exe" if system_platform == "windows" else "chromedriver"
+            
+            if not (driver_path.endswith('chromedriver') or driver_path.endswith('chromedriver.exe')):
                 # Look for chromedriver in the directory
-                import glob
                 driver_dir = os.path.dirname(driver_path)
-                possible_paths = glob.glob(os.path.join(driver_dir, '**/chromedriver'), recursive=True)
+                
+                # Search patterns for different platforms
+                search_patterns = [
+                    os.path.join(driver_dir, '**', executable_name),
+                    os.path.join(driver_dir, executable_name)
+                ]
+                
+                possible_paths = []
+                for pattern in search_patterns:
+                    possible_paths.extend(glob.glob(pattern, recursive=True))
+                
                 if possible_paths:
                     driver_path = possible_paths[0]
                     logger.info(f"Found chromedriver at: {driver_path}")
                 else:
-                    logger.error(f"Could not find chromedriver executable in {driver_dir}")
-                    raise Exception("Chrome driver not found")
+                    logger.error(f"Could not find {executable_name} executable in {driver_dir}")
+                    raise Exception(f"Chrome driver not found: {executable_name}")
             
             service = Service(driver_path)
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -84,9 +112,10 @@ class NSEDataScraper:
             try:
                 self.driver = webdriver.Chrome(options=chrome_options)
                 self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                logger.info("Successfully initialized Chrome driver using system PATH")
             except Exception as e2:
                 logger.error(f"All Chrome driver setup methods failed: {e2}")
-                raise Exception("Could not initialize Chrome driver. Please ensure Chrome browser is installed.")
+                raise Exception("Could not initialize Chrome driver. Please ensure Chrome browser is installed and available in PATH.")
         
     def initialize_session(self):
         """Initialize session by visiting NSE website and getting cookies"""

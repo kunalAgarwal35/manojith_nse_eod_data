@@ -14,14 +14,35 @@ A Selenium-based Python application to download historical options chain data fr
 
 ## Installation
 
-1. **Clone or download the project files**
+### Cross-Platform Support
+✅ **Windows 10/11** (PowerShell and Command Prompt)  
+✅ **macOS** (Intel and Apple Silicon)  
+✅ **Linux** (Ubuntu, CentOS, etc.)
+
+### Prerequisites
+- **Python 3.7+** (recommended: Python 3.8 or higher)
+- **Google Chrome browser** installed
+- **Internet connection** for downloading Chrome driver
+
+### Installation Steps
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/kunalAgarwal35/manojith_nse_eod_data.git
+   cd manojith_nse_eod_data
+   ```
 
 2. **Install Python dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Chrome Browser**: Make sure you have Google Chrome installed (required for Selenium)
+3. **Test cross-platform compatibility** (optional but recommended):
+   ```bash
+   python test_cross_platform.py
+   ```
+
+4. **Chrome Browser**: Ensure Google Chrome is installed and accessible
 
 ## Usage
 
@@ -119,18 +140,61 @@ The script properly handles NSE's session requirements by:
 ### Rate Limiting
 The script includes a 2-second delay between requests to be respectful to NSE servers.
 
+## Platform-Specific Notes
+
+### Windows
+- Supports both **PowerShell** and **Command Prompt**
+- Chrome driver automatically downloads as `chromedriver.exe`
+- Uses Windows-specific user agent string
+- Additional Windows-specific Chrome options for stability
+
+### macOS
+- Works on both **Intel** and **Apple Silicon** Macs
+- Chrome driver downloads as `chromedriver` (no .exe extension)
+- Uses macOS-specific user agent string
+- Handles macOS security permissions automatically
+
+### Linux
+- Tested on Ubuntu, CentOS, and other major distributions
+- May require additional permissions for Chrome driver execution
+- Uses Linux-specific user agent string
+- Supports both GUI and headless server environments
+
 ## Troubleshooting
+
+### Cross-Platform Issues
+
+1. **Chrome Driver Download Problems**:
+   ```bash
+   # Test your platform compatibility first
+   python test_cross_platform.py
+   ```
+
+2. **Platform Detection Issues**:
+   - The script automatically detects Windows/Mac/Linux
+   - Uses appropriate Chrome driver executable (.exe on Windows)
+   - Applies platform-specific user agent strings
 
 ### Common Issues
 
 1. **Chrome Driver Issues**:
-   - The script automatically downloads the Chrome driver
+   - The script automatically downloads the correct driver for your platform
    - Ensure Chrome browser is installed and up to date
+   - On Linux, you may need to install additional dependencies:
+     ```bash
+     # Ubuntu/Debian
+     sudo apt-get update
+     sudo apt-get install -y google-chrome-stable
+     
+     # CentOS/RHEL
+     sudo yum install -y google-chrome-stable
+     ```
 
 2. **Session Initialization Failures**:
    - NSE occasionally blocks automated requests
    - Try running in non-headless mode to see what's happening
    - Check your internet connection
+   - Verify Chrome is properly installed
 
 3. **No Expiry Dates Found**:
    - Verify the year is correct
@@ -141,6 +205,12 @@ The script includes a 2-second delay between requests to be respectful to NSE se
    - NSE might return JSON error instead of CSV
    - This usually indicates invalid date ranges or missing data
    - Check the logs for specific error messages
+
+5. **Permission Errors (Linux/Mac)**:
+   ```bash
+   # Make sure Chrome driver is executable
+   chmod +x ~/.wdm/drivers/chromedriver/*/chromedriver
+   ```
 
 ### Debug Mode
 
