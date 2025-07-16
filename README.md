@@ -212,6 +212,15 @@ The script includes a 2-second delay between requests to be respectful to NSE se
    chmod +x ~/.wdm/drivers/chromedriver/*/chromedriver
    ```
 
+6. **Chrome Browser Warnings/Errors**:
+   - You might see WebGL or GCM registration errors in the console
+   - These are harmless Chrome internal warnings in automated mode
+   - The scraper includes options to suppress most of these warnings
+   - Test silent operation:
+     ```bash
+     python test_silent_run.py
+     ```
+
 ### Debug Mode
 
 Run with visible browser to debug issues:

@@ -58,10 +58,30 @@ class NSEDataScraper:
         
         chrome_options.add_argument(f"--user-agent={user_agent}")
         
-        # Additional options to avoid detection
+        # Additional options to avoid detection and suppress warnings
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
+        
+        # Suppress common Chrome warnings/errors in automated mode
+        chrome_options.add_argument("--disable-gpu-sandbox")
+        chrome_options.add_argument("--disable-software-rasterizer") 
+        chrome_options.add_argument("--disable-background-timer-throttling")
+        chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+        chrome_options.add_argument("--disable-renderer-backgrounding")
+        chrome_options.add_argument("--disable-features=TranslateUI")
+        chrome_options.add_argument("--disable-ipc-flooding-protection")
+        chrome_options.add_argument("--disable-background-networking")
+        chrome_options.add_argument("--disable-sync")
+        chrome_options.add_argument("--disable-default-apps")
+        chrome_options.add_argument("--disable-extensions-http-throttling")
+        chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--no-default-browser-check")
+        
+        # Suppress Chrome logging to reduce console noise
+        chrome_options.add_argument("--log-level=3")  # Suppress INFO, WARNING, ERROR
+        chrome_options.add_argument("--silent")
+        chrome_options.add_argument("--disable-logging")
         
         # Windows-specific options
         if system_platform == "windows":
